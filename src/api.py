@@ -9,6 +9,7 @@ app = FastAPI(title="Game Search API")
 class SearchRequest(BaseModel):
    query: str
    limit: Optional[int] = None
+   mode: Optional[bool]
 
 @app.get("/")
 def root():
@@ -16,7 +17,7 @@ def root():
 
 @app.post("/search")
 def search(request: SearchRequest):
-    results = search_games(df, request.query, request.limit if request.limit else 10)
+    results = search_games(df, request.query, request.limit if request.limit else 10, request.mode if request.mode else True)
     return results.to_dict(orient="records")
  
 app.mount("/search-game", StaticFiles(directory="static", html=True), name="static")

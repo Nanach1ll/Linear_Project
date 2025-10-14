@@ -31,6 +31,10 @@
           required
         />
       </label>
+      <label>
+        Ratio
+        <input type="checkbox" name="mode" id="mode" />
+      </label>
       <button type="submit">Search</button>
     </form>
 
@@ -106,6 +110,7 @@
             body: JSON.stringify({
               query: payload.query,
               limit: payload.top_k,
+              mode: payload.mode,
             }),
           });
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -125,6 +130,7 @@
         fetchData({
           query: queryVal,
           top_k: Number(form.top_k.value),
+          mode: form.mode.checked,
         });
       });
     </script>
