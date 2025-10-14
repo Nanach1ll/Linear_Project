@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[234]:
 
 
 import pandas as pd
@@ -11,7 +11,7 @@ from kagglehub import KaggleDatasetAdapter
 import re
 
 
-# In[ ]:
+# In[235]:
 
 
 file_path = 'roblox_games_data.csv'
@@ -23,71 +23,71 @@ df = kagglehub.dataset_load(
 )
 
 
-# In[ ]:
+# In[236]:
 
 
 df.head()
 df.drop(["Date Created" , "Server Size" , "Last Updated" , "Date" , "Unnamed: 0" ],axis=1 , inplace=True)
-df["Title"] = df["Title"].apply(lambda x: re.sub(r"^\[.*?\]", "", x).strip())
+# df["Title"] = df["Title"].apply(lambda x: re.sub(r"^\[.*?\]", "", x).strip())
 
-df.drop_duplicates(subset="Title", inplace=True)
+df.drop_duplicates(subset="gameID", inplace=True)
 
 
-# In[ ]:
+# In[237]:
 
 
 df.head()
 
 
-# In[ ]:
+# In[238]:
 
 
 df.tail()
 
 
-# In[ ]:
+# In[239]:
 
 
 df.sample(5)
 
 
-# In[ ]:
+# In[240]:
 
 
 df.shape
 
 
-# In[ ]:
+# In[241]:
 
 
 df.dtypes
 
 
-# In[ ]:
+# In[242]:
 
 
 df.info()
 
 
-# In[ ]:
+# In[243]:
 
 
 df.describe(include="all")
 
 
-# In[ ]:
+# In[244]:
 
 
 df["Genre"].unique()
 
 
-# In[ ]:
+# In[245]:
 
 
 df["Category"].unique()
 
 
-# In[ ]:
+# In[246]:
 
 
 df["text"] = df["Genre"].astype(str) + " " + df["Title"].astype(str) + " " + df["Category"].astype(str)
@@ -97,7 +97,7 @@ df.head()
 
 # # เริ่ม ทำ
 
-# In[ ]:
+# In[247]:
 
 
 #ทำ tf-idf
@@ -155,7 +155,7 @@ def compute_tfidf(text, idf):
     return tfidf
 
 
-# In[ ]:
+# In[248]:
 
 
 def cosine_similarity(vec1, vec2):
@@ -167,7 +167,7 @@ def cosine_similarity(vec1, vec2):
     return numerator / denominator if denominator else 0.0
 
 
-# In[ ]:
+# In[249]:
 
 
 def text_similarity(row, query, idf, title_weight=3):
@@ -187,7 +187,7 @@ def compute_features_for_query(df, query):
     return df
 
 
-# In[ ]:
+# In[250]:
 
 
 def parse_number(s):
@@ -215,7 +215,7 @@ def predict_linear_regression(X, beta):
     return X_b @ beta
 
 
-# In[ ]:
+# In[251]:
 
 
 # แปลงคอลัมน์
@@ -251,7 +251,7 @@ df['genre_score'] = df['Genre'].map(genre_mapping).fillna(0.5)
 # In[ ]:
 
 
-def search_games(df, query, top=10):
+def search_games(df, query, top=10 , mode = True):
     # 1. คำนวณ IDF ครอบคลุม Title + Description
     idf = compute_idf(df, text_columns=['Title','Description'])
 
@@ -262,7 +262,10 @@ def search_games(df, query, top=10):
     df_filtered = df[(df['text_similarity'] > 0)].copy()
 
     # 4. สร้าง X matrix สำหรับ regression
-    X_train = df_filtered[['text_similarity','visit_ratio_norm','fav_ratio_norm','genre_score']].values
+    if (mode):
+        X_train = df_filtered[['text_similarity','visit_ratio_norm','fav_ratio_norm','genre_score']].values
+    else :
+        X_train = df_filtered[ ["text_similarity","genre_score"] ].values
 
     # 5. สร้าง target (ถ้าไม่มี user rating จริง)
     if 'UserRating' not in df_filtered.columns:
