@@ -3,3 +3,4 @@ kagglehub[pandas-datasets]
 pandas
 kagglehub
 ipywidgets
+nltk
