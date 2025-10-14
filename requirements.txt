@@ -4,3 +4,5 @@ pandas
 kagglehub
 ipywidgets
 nltk
+fastapi[standard]
+pydantic

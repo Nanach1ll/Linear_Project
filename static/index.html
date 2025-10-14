@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gen Alpha Roblox Skibidi Rizz Ranking Tools</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <h1>Gen Alpha Roblox Skibidi Rizz Ranking Tools</h1>
+
+    <form id="search-form">
+      <label>
+        Query
+        <input
+          type="text"
+          id="query"
+          name="query"
+          placeholder="type game name..."
+          required
+        />
+      </label>
+      <label>
+        Top K
+        <input
+          type="number"
+          id="top_k"
+          name="top_k"
+          value="10"
+          min="1"
+          max="50"
+          required
+        />
+      </label>
+      <button type="submit">Search</button>
+    </form>
+
+    <div id="loader" class="loader hidden" aria-live="polite">
+      <div class="spinner"></div>
+      <span>Loading...</span>
+    </div>
+
+    <div id="results" class="results">
+      <p class="empty" id="placeholder-msg">
+        Enter a query and submit to see results.
+      </p>
+    </div>
+
+    <script>
+      const form = document.getElementById("search-form");
+      const loader = document.getElementById("loader");
+      const resultsEl = document.getElementById("results");
+      const placeholder = document.getElementById("placeholder-msg");
+
+      function showLoader(show) {
+        loader.classList.toggle("hidden", !show);
+      }
+
+      function clearPlaceholder() {
+        if (placeholder) placeholder.remove();
+      }
+
+      function renderResults(data) {
+        resultsEl.innerHTML = "";
+        if (!data) {
+          resultsEl.innerHTML = '<p class="empty">No results.</p>';
+          return;
+        }
+        const list = document.createElement("ul");
+        list.className = "game-list";
+        data.forEach((r) => {
+          const li = document.createElement("li");
+          const title = r.Title || "(no title)";
+          const creator = r.Creator || r.creator || "-";
+          const sim =
+            r.text_similarity !== undefined
+              ? Number(r.text_similarity).toFixed(3)
+              : "-";
+          const a = document.createElement("a");
+          a.href = r.URL || "#";
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          // Title + Creator
+          a.textContent = `${title} — ${creator}`;
+          a.className = "game-link";
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = `text_similarity: ${sim}`;
+
+          li.appendChild(a);
+          li.appendChild(meta);
+          list.appendChild(li);
+        });
+        resultsEl.appendChild(list);
+      }
+
+      async function fetchData(payload) {
+        if (!payload.query) return;
+        clearPlaceholder();
+        showLoader(true);
+        resultsEl.innerHTML = "";
+        try {
+          const res = await fetch("/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              query: payload.query,
+              top_k: payload.top_k,
+            }),
+          });
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const data = await res.json();
+          renderResults(data);
+        } catch (e) {
+          resultsEl.innerHTML = `<p class="error">Error: ${e.message}</p>`;
+        } finally {
+          showLoader(false);
+        }
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const queryVal = form.query.value.trim();
+        if (!queryVal) return;
+        fetchData({
+          query: queryVal,
+          top_k: Number(form.top_k.value),
+        });
+      });
+    </script>
+  </body>
+</html>
