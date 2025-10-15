@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[234]:
+# In[ ]:
 
 
 import pandas as pd
@@ -11,7 +11,7 @@ from kagglehub import KaggleDatasetAdapter
 import re
 
 
-# In[235]:
+# In[ ]:
 
 
 file_path = 'roblox_games_data.csv'
@@ -23,7 +23,7 @@ df = kagglehub.dataset_load(
 )
 
 
-# In[236]:
+# In[ ]:
 
 
 df.head()
@@ -33,61 +33,61 @@ df.drop(["Date Created" , "Server Size" , "Last Updated" , "Date" , "Unnamed: 0"
 df.drop_duplicates(subset="gameID", inplace=True)
 
 
-# In[237]:
+# In[ ]:
 
 
 df.head()
 
 
-# In[238]:
+# In[ ]:
 
 
 df.tail()
 
 
-# In[239]:
+# In[ ]:
 
 
 df.sample(5)
 
 
-# In[240]:
+# In[ ]:
 
 
 df.shape
 
 
-# In[241]:
+# In[ ]:
 
 
 df.dtypes
 
 
-# In[242]:
+# In[ ]:
 
 
 df.info()
 
 
-# In[243]:
+# In[ ]:
 
 
 df.describe(include="all")
 
 
-# In[244]:
+# In[ ]:
 
 
 df["Genre"].unique()
 
 
-# In[245]:
+# In[ ]:
 
 
 df["Category"].unique()
 
 
-# In[246]:
+# In[ ]:
 
 
 df["text"] = df["Genre"].astype(str) + " " + df["Title"].astype(str) + " " + df["Category"].astype(str)
@@ -97,7 +97,7 @@ df.head()
 
 # # เริ่ม ทำ
 
-# In[247]:
+# In[ ]:
 
 
 #ทำ tf-idf
@@ -155,7 +155,7 @@ def compute_tfidf(text, idf):
     return tfidf
 
 
-# In[248]:
+# In[ ]:
 
 
 def cosine_similarity(vec1, vec2):
@@ -167,7 +167,7 @@ def cosine_similarity(vec1, vec2):
     return numerator / denominator if denominator else 0.0
 
 
-# In[249]:
+# In[ ]:
 
 
 def text_similarity(row, query, idf, title_weight=3):
@@ -187,7 +187,7 @@ def compute_features_for_query(df, query):
     return df
 
 
-# In[250]:
+# In[ ]:
 
 
 def parse_number(s):
@@ -215,7 +215,7 @@ def predict_linear_regression(X, beta):
     return X_b @ beta
 
 
-# In[251]:
+# In[ ]:
 
 
 # แปลงคอลัมน์
@@ -269,12 +269,13 @@ def search_games(df, query, top=10 , mode = True):
 
     # 5. สร้าง target (ถ้าไม่มี user rating จริง)
     if 'UserRating' not in df_filtered.columns:
-        df_filtered['UserRating'] = 0.4 * df_filtered['visit_ratio_norm'] + 0.3 * df_filtered['fav_ratio_norm'] + 0.3 * np.random.rand(len(df_filtered))
+        df_filtered['UserRating'] = 0.4 * df_filtered['visit_ratio_norm'] + 0.3 * df_filtered['fav_ratio_norm']
 
     y_train = df_filtered['UserRating'].values
 
     # 6. Train Linear Regression
     beta = train_linear_regression(X_train, y_train)
+
     print("Learned coefficients (β):", beta)
 
     # 7. Predict final score
@@ -283,4 +284,10 @@ def search_games(df, query, top=10 , mode = True):
     # 8. Sort by final_score
     df_sorted = df_filtered.sort_values(by='final_score', ascending=False)
     return df_sorted[['Title','Creator','URL','text_similarity','visit_ratio_norm','fav_ratio_norm','genre_score','final_score']].head(top)
+
+
+# In[ ]:
+
+
+search_games(df,"murder",top=100,mode=False)
 
